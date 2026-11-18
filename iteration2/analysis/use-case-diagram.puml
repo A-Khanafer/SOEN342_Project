@@ -1,0 +1,60 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontName SansSerif
+title Appointment Tracking System — Iteration II use cases
+actor Patient
+actor "Administrative Staff" as Staff
+actor "Healthcare Professional" as Professional
+rectangle "Appointment Tracking System" {
+  usecase "UC1 Request Appointment" as UC1 <<critical>>
+  usecase "UC2 Conduct Consultation" as UC2 <<critical>>
+  usecase "UC3 Issue Referral" as UC3 <<critical>>
+  usecase "NC1 Register Arrival" as NC1
+  usecase "NC2 Manage Appointment\n(confirm / reschedule / cancel)" as NC2
+  usecase "NC3 Register Patient" as NC3
+  usecase "NC4 Search Patient" as NC4
+  usecase "NC5 Process Uninsured Payment" as NC5
+  usecase "NC6 Record External Referral" as NC6
+  usecase "NC7 View Clinical Record" as NC7
+  usecase "NC8 Issue Prescription" as NC8
+  usecase "NC9 Request Follow-up Appointment" as NC9
+  usecase "Make Availability\n(SO25 reserved, Part B)" as Make
+  usecase "Search Availability\n(SO26 reserved, Part B)" as Search
+  usecase "W1 Add Patient to Waitlist\nSO27" as W1
+  usecase "W2 Find Eligible Waitlisted Patients\nSO28" as W2
+  usecase "W3 Record Telephone Offer Outcome\nSO29" as W3
+  usecase "W4 Change Waitlist Priority\nSO30" as W4
+  usecase "C1 Import CSV\nSO31" as Import
+  usecase "C2 Export Availability CSV\nSO32" as Export
+  usecase "R1 Inspect / Select Resources\nSO33 / SO34" as Resources
+  NC1 ..> NC4 : <<include>>
+  NC8 ..> UC2 : <<extend>>\n[medication needed, step 5]
+  NC9 ..> UC2 : <<extend>>\n[follow-up needed, step 5]
+  W1 ..> UC1 : <<extend>>\n[no suitable slot and placement requested, E3a]
+  UC1 ..> Search : <<include>>
+  Resources ..> UC1 : <<extend>>\n[service requires resources, selection]
+}
+Patient -- UC1
+Staff -- UC1
+Staff -- NC1
+Staff -- NC2
+Staff -- NC3
+Staff -- NC4
+Staff -- NC5
+Staff -- NC6
+Staff -- Make
+Staff -- Search
+Staff -- W1
+Staff -- W2
+Staff -- W3
+Staff -- W4
+Staff -- Import
+Staff -- Export
+Staff -- Resources
+Professional -- UC2
+Professional -- UC3
+Professional -- NC4
+Professional -- NC7
+@enduml

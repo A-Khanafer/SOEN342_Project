@@ -1,0 +1,21 @@
+@startuml
+title W3 — SO29 / CO29 Record telephone offer outcome
+skinparam shadowing false
+actor "Administrative Staff" as Staff
+participant ":AppointmentTrackingSystem" as System
+note over Staff : Staff telephones a candidate outside the software.
+Staff -> System : recordWaitlistOfferOutcome(entry, slot, medicalService,\noutcome, removeIfDeclined)
+alt valid current entry, opening, service and outcome
+  alt outcome = ACCEPTED; removeIfDeclined = false
+    System --> Staff : offer recorded; proceed to ordinary UC1 booking
+    ref over Staff, System : UC1 / SO02 rechecks and books only on explicit selection
+  else outcome = DECLINED; removeIfDeclined = true
+    System --> Staff : offer recorded; entry REMOVED
+  else outcome = DECLINED; removeIfDeclined = false
+    System --> Staff : offer recorded; entry remains WAITING
+  end
+else stale/ineligible selection or invalid outcome/removal combination
+  System --> Staff : rejection reason; no offer or entry change
+end
+note over System : SO29 never reserves or books a slot.
+@enduml

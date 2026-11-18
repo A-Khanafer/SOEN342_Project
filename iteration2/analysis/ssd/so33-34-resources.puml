@@ -1,0 +1,22 @@
+@startuml
+title R1 — SO33 / CO33 and SO34 / CO34 (analysis only)
+skinparam shadowing false
+actor "Administrative Staff" as Staff
+participant ":AppointmentTrackingSystem" as System
+Staff -> System : findAvailableResources(medicalService, clinicLocation, date, start, end)
+alt known service/location and valid interval
+  System --> Staff : available units by requirement; unmet quantities if any
+else invalid references or interval
+  System --> Staff : rejection reason; no domain change
+end
+opt resource-requiring service and unfinished UC1 selection
+  Staff -> System : selectAppointmentResources(slot, resources)
+  alt sufficient distinct units of required kinds, free at selected location
+    System --> Staff : selection accepted as unfinished booking input
+    ref over Staff, System : SO02 rechecks and records booking + allocations together
+  else wrong kind/location, missing/duplicate units or unavailable
+    System --> Staff : selection refused; no allocation or booking
+  end
+end
+note over System : No resource detailed design or Java implementation in Part A.
+@enduml

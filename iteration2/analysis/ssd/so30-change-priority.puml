@@ -1,0 +1,16 @@
+@startuml
+title W4 — SO30 / CO30 Change waitlist priority
+skinparam shadowing false
+actor "Administrative Staff" as Staff
+participant ":AppointmentTrackingSystem" as System
+Staff -> System : changeWaitlistPriority(entry, priority)
+alt known WAITING entry and valid staff priority value
+  System --> Staff : updated entry details
+else unknown/inactive entry or invalid priority
+  System --> Staff : rejection reason; no entry change
+end
+note over System
+  Request date and criteria remain unchanged.
+  Subsequent candidate queries use the new priority.
+end note
+@enduml

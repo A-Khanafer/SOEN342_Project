@@ -1,0 +1,21 @@
+@startuml
+title NC2 — SO17 / revised CO17 Cancel appointment
+skinparam shadowing false
+actor "Administrative Staff" as Staff
+participant ":AppointmentTrackingSystem" as System
+Staff -> System : cancelAppointment(appointment)
+alt cancellable appointment owns its occupied slot
+  alt eligible patients found after releasing slot/resources
+    System --> Staff : cancelled details; OPEN slot; candidates in priority order
+  else no eligible patients
+    System --> Staff : cancelled details; OPEN slot; empty candidate list
+  end
+else unknown, already cancelled, arrived/completed or inconsistent occupancy
+  System --> Staff : cancellation refused; no state change
+end
+note over System
+  Retain historical appointment and referral links.
+  No automatic telephone offer or replacement booking.
+  Candidate lookup follows CO28 without another actor event.
+end note
+@enduml

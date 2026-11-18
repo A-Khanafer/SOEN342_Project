@@ -1,0 +1,19 @@
+@startuml
+title W1 — SO27 / CO27 Add patient to waitlist
+skinparam shadowing false
+actor "Administrative Staff" as Staff
+participant ":AppointmentTrackingSystem" as System
+note over Staff, System
+  Patient requested placement; staff is identified.
+  No suitable open slot is available (checked by the system).
+end note
+Staff -> System : addPatientToWaitlist(patientNumber, medicalService,\nrequestedProfessional?, requestedSpecialty?, dateRange?, priority)
+alt valid request; no equivalent active entry or suitable availability
+  System --> Staff : waiting entry details and priority
+else suitable open slot exists
+  System --> Staff : available slots; return to UC1 booking
+else unknown/incompatible input, invalid dates/priority, or duplicate
+  System --> Staff : rejection reason (existing entry if duplicate)
+end
+note over System : No Appointment or clinical Referral is created.
+@enduml

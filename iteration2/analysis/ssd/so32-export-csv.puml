@@ -1,0 +1,17 @@
+@startuml
+title C2 — SO32 / CO32 Export complete availability
+skinparam shadowing false
+actor "Administrative Staff" as Staff
+participant ":AppointmentTrackingSystem" as System
+Staff -> System : exportAvailabilityCsv(destinationFile)
+alt new writable destination; consistent representable data; write succeeds
+  System --> Staff : absolute CSV path; exported slot-record count
+else invalid/existing path, inconsistent data or write failure
+  System --> Staff : export error; domain state unchanged
+end
+note over System
+  Every slot, including BOOKED, is exported.
+  Patient identity supports reconstructing occupied slots.
+  An empty dataset produces a header-only CSV.
+end note
+@enduml
