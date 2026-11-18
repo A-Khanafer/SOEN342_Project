@@ -32,11 +32,10 @@ public class TimeSlot {
 
     
     public boolean overlaps(TimeSlot other) {
-        return other.professional == professional 
+        return professional.equals(other.professional) 
                 && other.date.equals(date) 
                 && startTime.isBefore(other.endTime)
                 && other.startTime.isBefore(endTime);
-    
     }
 
     
@@ -44,7 +43,7 @@ public class TimeSlot {
         return (status == SlotStatus.OPEN); 
     }
 
-    public void book() {
+    void book() {
         if (status != SlotStatus.OPEN)
             throw new IllegalStateException("already booked");
         else
@@ -52,7 +51,7 @@ public class TimeSlot {
 
     }
 
-    public void release() {
+    void release() {
         status = SlotStatus.OPEN;
     }
 

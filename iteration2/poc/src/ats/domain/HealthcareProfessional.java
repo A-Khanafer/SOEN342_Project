@@ -1,8 +1,8 @@
 package ats.domain;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class HealthcareProfessional {
     
@@ -11,6 +11,8 @@ public class HealthcareProfessional {
     private final String lastName;
     private final String licenseNumber;
     private final String professionType;
+    private static int nextId = 1;
+    private final int id;
     
     private final List<MedSpecialty> specialties = new ArrayList<>();
 
@@ -28,6 +30,8 @@ public class HealthcareProfessional {
         this.lastName = lastName.trim();
         this.licenseNumber = licenseNumber;
         this.professionType = professionType;
+        this.id = nextId;
+        nextId++;
 
     }
 
@@ -46,6 +50,9 @@ public class HealthcareProfessional {
     }
     public String getPType(){
         return professionType;
+    }
+    public int getID(){
+        return id;
     }
 
 
@@ -82,6 +89,28 @@ public class HealthcareProfessional {
         else {
             return title + " " + getFullName();
         }
+    }
+
+    //override equals()
+    @Override 
+    public boolean equals(Object o){
+        
+        if (o == this){
+            return true;
+        }
+        else if (!(o instanceof HealthcareProfessional)){
+            return false;
+
+        }
+        HealthcareProfessional other = (HealthcareProfessional) o;
+        return id == other.id;
+    }
+
+    //override hashCode
+
+    @Override
+    public int hashCode(){
+        return Integer.hashCode(id);
     }
 
 

@@ -80,7 +80,7 @@ public class AvailabilityService {
     }
 
     private boolean matches(TimeSlot slot, SearchCriteria criteria) {
-        if (criteria.getProfessional() != null && slot.getProfessional() != criteria.getProfessional()) {
+        if (criteria.getProfessional() != null && !slot.getProfessional().equals(criteria.getProfessional())) {
             return false;
         }
         if (criteria.getSpecialty() != null && !slot.getProfessional().hasSpecialty(criteria.getSpecialty())) {
