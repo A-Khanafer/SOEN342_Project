@@ -28,7 +28,7 @@ At most one non-cancelled Appointment occupies a slot. Cancelled appointments re
 
 **Operation:** `addPatientToWaitlist(patientNumber: PatientNumber, medicalService: MedicalServiceRef, requestedProfessional: Optional<HealthcareProfessionalRef>, requestedSpecialty: Optional<MedSpecialtyRef>, dateRange: Optional<DateRange>, priority: Priority)`.
 
-**Cross-references:** SO27; W1; UC1 E3a; `so27-add-to-waitlist.puml`.
+**Cross-references:** SO27; W1; UC1 E3a; `so27-add-to-waitlist.svg`.
 
 **Preconditions:** An identified Administrative Staff member is acting on the patient's placement request.
 
@@ -44,7 +44,7 @@ At most one non-cancelled Appointment occupies a slot. Cancelled appointments re
 
 **Operation:** `findEligibleWaitlistedPatients(slot: TimeSlotRef, medicalService: MedicalServiceRef)`.
 
-**Cross-references:** SO28; W2; revised CO17; `so28-find-eligible.puml`.
+**Cross-references:** SO28; W2; revised CO17; `so28-find-eligible.svg`.
 
 **Preconditions:** Identified Administrative Staff is examining an opening.
 
@@ -56,7 +56,7 @@ At most one non-cancelled Appointment occupies a slot. Cancelled appointments re
 
 **Operation:** `recordWaitlistOfferOutcome(entry: WaitlistEntryRef, slot: TimeSlotRef, medicalService: MedicalServiceRef, outcome: OfferOutcome, removeIfDeclined: Boolean)`.
 
-**Cross-references:** SO29; W3; CO28; ordinary UC1/CO2; `so29-record-offer.puml`.
+**Cross-references:** SO29; W3; CO28; ordinary UC1/CO2; `so29-record-offer.svg`.
 
 **Preconditions:** Identified Administrative Staff has made a telephone offer to the entry's patient. Outcome is the staff's report of that conversation/attempt, not an automated contact.
 
@@ -74,7 +74,7 @@ At most one non-cancelled Appointment occupies a slot. Cancelled appointments re
 
 **Operation:** `changeWaitlistPriority(entry: WaitlistEntryRef, priority: Priority)`.
 
-**Cross-references:** SO30; W4; `so30-change-priority.puml`.
+**Cross-references:** SO30; W4; `so30-change-priority.svg`.
 
 **Preconditions:** Identified Administrative Staff is maintaining the waiting list.
 
@@ -86,7 +86,7 @@ At most one non-cancelled Appointment occupies a slot. Cancelled appointments re
 
 **Operation:** `importCsv(sourceFile: FilePath, kind: CsvKind)` where kind is AVAILABILITY, APPOINTMENTS or WAITLIST_PATIENTS. Part C dispatches to the corresponding public Java method.
 
-**Cross-references:** SO31; C1; assignment pp. 4–5; `so31-import-csv.puml`; `ats.io.CsvImportExport`.
+**Cross-references:** SO31; C1; assignment pp. 4–5; `so31-import-csv.svg`; `ats.io.CsvImportExport`.
 
 **Preconditions:** Identified authorized staff selected an import kind. Shared in-memory state exists (possibly empty). APPOINTMENTS input requires matching availability to have been imported/created; absence is checked per row.
 
@@ -104,7 +104,7 @@ At most one non-cancelled Appointment occupies a slot. Cancelled appointments re
 
 **Operation:** `exportAvailabilityCsv(destinationFile: FilePath)`.
 
-**Cross-references:** SO32; C2; assignment p. 4; `so32-export-csv.puml`; `ats.io.CsvImportExport.exportAvailability`.
+**Cross-references:** SO32; C2; assignment p. 4; `so32-export-csv.svg`; `ats.io.CsvImportExport.exportAvailability`.
 
 **Preconditions:** Identified authorized staff requested an export; the shared in-memory dataset is accessible.
 
@@ -116,7 +116,7 @@ At most one non-cancelled Appointment occupies a slot. Cancelled appointments re
 
 **Operation:** `cancelAppointment(appointment: AppointmentRef)` (signature unchanged).
 
-**Cross-references:** SO17; NC2 S1b, S4–S5; assignment p. 2 cancellation/waitlist paragraph; CO28; `so17-cancel-appointment.puml`.
+**Cross-references:** SO17; NC2 S1b, S4–S5; assignment p. 2 cancellation/waitlist paragraph; CO28; `so17-cancel-appointment.svg`.
 
 **Preconditions:** Identified Administrative Staff has selected cancellation of a stored appointment. Cancellability and slot ownership are checked rather than assumed.
 
@@ -134,7 +134,7 @@ At most one non-cancelled Appointment occupies a slot. Cancelled appointments re
 
 **Operation:** `findAvailableResources(medicalService: MedicalServiceRef, clinicLocation: ClinicLocationRef, date: Date, start: Time, end: Time)`.
 
-**Cross-references:** SO33; R1; UC1 M3–M5; assignment p. 2; `so33-34-resources.puml`.
+**Cross-references:** SO33; R1; UC1 M3–M5; assignment p. 2; `so33-34-resources.svg`.
 
 **Preconditions:** Identified authorized staff is examining an appointment interval.
 
@@ -146,7 +146,7 @@ At most one non-cancelled Appointment occupies a slot. Cancelled appointments re
 
 **Operation:** `selectAppointmentResources(slot: TimeSlotRef, resources: Sequence<ResourceRef>)`.
 
-**Cross-references:** SO34; R1; UC1 M4–M6; CO2; `so33-34-resources.puml`.
+**Cross-references:** SO34; R1; UC1 M4–M6; CO2; `so33-34-resources.svg`.
 
 **Preconditions:** SO01 established unfinished booking context for a service and patient, before final SO02 recording. Staff supplies the proposed slot together with the resource selection. This is a proposed extension to the UC1 selection flow for resource-requiring services; no earlier slot-selection system event is assumed.
 

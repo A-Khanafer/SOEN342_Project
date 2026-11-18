@@ -1,6 +1,6 @@
 # Iteration II use-case additions
 
-The three critical use cases remain UC1 Request Appointment, UC2 Conduct Consultation and UC3 Issue Referral. NC1–NC9 retain the names and behavior in `iteration1/non_critical_usecases.md`. The updated diagram is [use-case-diagram.svg](use-case-diagram.svg), editable as [use-case-diagram.puml](use-case-diagram.puml).
+The three critical use cases remain UC1 Request Appointment, UC2 Conduct Consultation and UC3 Issue Referral. NC1–NC9 retain the names and behavior in `iteration1/non_critical_usecases.md`. The updated diagram is [use-case-diagram.svg](use-case-diagram.svg).
 
 ## Existing scenario changes
 

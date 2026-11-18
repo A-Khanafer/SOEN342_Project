@@ -1,6 +1,6 @@
 # UC3 Issue Referral realizations
 
-One design sequence diagram per original system operation: [SO08](so08-begin-referral.svg), [SO09](so09-issue-referral.svg), [SO10](so10-cancel-referral.svg). Each has an adjacent editable PlantUML source. Contracts were read in `iteration1/SOEN342-SSDs-and-Operation-Contracts.pdf`, CO8–CO10, pp. 12–13, and checked against `iteration1/UC3-issue-referral.docx`. The system signatures are unchanged.
+One design sequence diagram per original system operation: [SO08](so08-begin-referral.svg), [SO09](so09-issue-referral.svg), [SO10](so10-cancel-referral.svg). Contracts were read in `iteration1/SOEN342-SSDs-and-Operation-Contracts.pdf`, CO8–CO10, pp. 12–13, and checked against `iteration1/UC3-issue-referral.docx`. The system signatures are unchanged.
 
 | Original guarantee | Realization |
 | --- | --- |
