@@ -1,0 +1,86 @@
+@startuml
+title UC3 — SO09 issueReferral (CO9, Iteration I pp. 12–13)
+skinparam shadowing false
+hide footbox
+actor "Healthcare Professional" as HP
+participant "rc:ReferralController" as RC <<controller>>
+participant "records:ClinicRecords" as Records
+participant "receiver:HealthcareProfessional\n[optional]" as Receiver
+participant "p:Patient" as P
+note over RC, P
+  Successful SO08 supplies p and issuer through controller attributes.
+  Specialty and optional receiver references resolve to existing objects.
+  recordActivity creates/registers ActivityRecord as shown in SO08.
+end note
+HP -> RC : issueReferral(medSpecialty, clinicalReason, receivingProfessional?)
+activate RC
+break reason missing (E3a; retain context, retry M3)
+  RC -> Records : recordActivity(issuer, p, missingReason)
+  RC --> HP : clinical reason required
+end
+opt receivingProfessional supplied (E3b)
+  RC -> Receiver : hasSpecialty(medSpecialty)
+  Receiver --> RC : receiverMatches
+end
+break receiver supplied and not receiverMatches (E3c; retain context)
+  RC -> Records : recordActivity(issuer, p, receiverMismatch)
+  RC --> HP : select another receiver or none; retry M3
+end
+RC -> Records : isSpecialtyOffered(medSpecialty)
+Records --> RC : offered
+note right of Records
+  Information Expert: consult professional specialty
+  and practice-location information.
+  At least one matching professional practises
+  at a ClinicLocation; an open slot is not required.
+end note
+break not offered (E4a; end)
+  RC -> Records : recordActivity(issuer, p, specialtyUnavailable)
+  RC -> RC : clearReferralContext()
+  RC --> HP : no internal referral for this specialty
+end
+RC -> P : findOpenReferral(medSpecialty)
+P --> RC : existing or null
+break existing != null (E5a; end)
+  RC -> Records : recordActivity(issuer, p, openDuplicate)
+  RC -> RC : clearReferralContext()
+  RC --> HP : existing Referral (unchanged)
+end
+RC -> P : makeReferral(issuer, medSpecialty, clinicalReason, receiver?, today)
+create participant "r:Referral" as R
+P -> R : create(p, issuer, medSpecialty, clinicalReason, receiver?, today)
+P --> RC : r (detached until recording succeeds)
+note right of R
+  Reason/date and patient/issuer/specialty/optional receiver
+  are initialized from parameters.
+  No ExternalPhysician issuer is linked.
+  Initial priority/status policy is unresolved in CO9.
+end note
+RC -> Records : makeActivity(issuer, p, referralIssued)
+create participant "ar:ActivityRecord" as AR
+Records -> AR : create(now, referralIssued, issuer, p)
+Records --> RC : ar (detached)
+RC -> Records : recordReferralAndActivity(p, r, ar)
+alt recording succeeds (M6–M8)
+  Records -> P : addReferral(r)
+  Records -> Records : addReferral(r); addActivity(ar)
+  Records --> RC : recorded
+  RC -> RC : clearReferralContext()
+  RC --> HP : recorded Referral r
+else recording fails (E6a)
+  Records --> RC : failure; nothing registered
+  RC -> R : discard detached instance
+  destroy R
+  RC -> AR : discard detached instance
+  destroy AR
+  RC -> RC : clearReferralContext()
+  RC --> HP : recording failed; end
+end
+deactivate RC
+note over Records, P
+  Recording is one logical all-or-nothing action; earlier audits remain.
+  Detached failed objects never enter recorded domain collections.
+  No database or persistence framework is prescribed.
+  No Appointment is created by issueReferral.
+end note
+@enduml
