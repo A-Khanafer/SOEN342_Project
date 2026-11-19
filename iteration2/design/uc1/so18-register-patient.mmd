@@ -1,0 +1,26 @@
+sequenceDiagram
+    actor Staff as :AdministrativeStaff
+    participant C as :BookingController
+    participant R as patients : PatientRegistry
+    participant L as log : ActivityLog
+    Note over Staff,L: SO18 registerPatient(...). NC3 Register Patient, used by UC1 E1a. Contract CO18
+    Staff->>C: p := registerPatient(firstName, lastName, dateOfBirth, phone, insurance)
+    Note over Staff,C: insurance is created by the UI as create(type, number, provider), or null when the patient has none
+    C->>R: existing := findDuplicate(firstName, lastName, dateOfBirth)
+    C->>R: p := register(firstName, lastName, dateOfBirth, phone)
+    R->>R: existing := findDuplicate(firstName, lastName, dateOfBirth)
+    alt existing = null
+        create participant P as p : Patient
+        R->>P: create(firstName, lastName, phone, dateOfBirth)
+        Note over P: patientNumber assigned automatically
+        R->>R: add p to patients
+    end
+    R-->>C: p
+    opt existing = null
+        opt insurance != null
+            C->>P: addInsurance(insurance)
+        end
+        C->>L: record(staffName, "patient registered", p)
+    end
+    C->>C: setCurrentPatient(p)
+    C-->>Staff: p

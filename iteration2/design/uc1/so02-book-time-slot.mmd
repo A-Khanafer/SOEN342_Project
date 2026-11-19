@@ -1,0 +1,35 @@
+sequenceDiagram
+    actor Staff as :AdministrativeStaff
+    participant C as :BookingController
+    participant TS as ts : TimeSlot
+    participant AR as appointments : AppointmentRegistry
+    participant X as x : Appointment
+    participant L as log : ActivityLog
+    Note over Staff,L: SO02 bookTimeSlot(ts). UC1 M4-M8, E5a, E5b. Contract CO2. p = currentPatient (set by SO01 or SO18)
+    Staff->>C: a := bookTimeSlot(ts)
+    C->>TS: open := isOpen()
+    alt not open (E5a)
+        C-->>Staff: SlotUnavailableException, nothing recorded
+    end
+    C->>AR: conflict := findOverlapping(p, ts)
+    loop for each x in the registry
+        AR->>X: px := getPatient()
+        AR->>X: st := getStatus()
+        AR->>X: sx := getSlot()
+        AR->>AR: [px = p and st != CANCELLED and timesOverlap(sx, ts)] conflict := x
+    end
+    alt conflict != null (E5b)
+        C-->>Staff: OverlappingAppointmentException(conflict), nothing recorded
+    end
+    C->>AR: a := book(p, ts)
+    create participant A as a : Appointment
+    AR->>A: create(p, ts)
+    A->>TS: book()
+    Note over TS: status := BOOKED
+    Note over A: status := BOOKED, patient := p, slot := ts
+    AR->>AR: add a to appointments
+    C->>L: record(staffName, "appointment booked", p)
+    create participant REC as ar : ActivityRecord
+    L->>REC: create(now, action, performedBy, p)
+    C->>C: setCurrentPatient(null)
+    C-->>Staff: a

@@ -1,0 +1,22 @@
+sequenceDiagram
+    actor Staff as :AdministrativeStaff
+    participant C as :BookingController
+    participant R as patients : PatientRegistry
+    participant P as p : Patient
+    Note over Staff,P: SO01 startBooking(patientKey). UC1 M1-M2, E1a, E2a. Contract CO1
+    Staff->>C: matches := startBooking(patientKey)
+    C->>R: matches := findByKey(patientKey)
+    loop for each p in the registry
+        R->>P: n := getPatientNumber()
+        R->>P: ph := getPhone()
+        Note over R: [n = patientKey or digits(ph) = digits(patientKey)] add p to matches
+    end
+    R-->>C: matches
+    alt matches.size() = 1
+        C->>C: setCurrentPatient(matches.get(0))
+        Note over C: booking in progress for this Patient (controller attribute, not domain state)
+    else matches is empty (E1a) or matches.size() > 1 (E2a)
+        C->>C: setCurrentPatient(null)
+        Note over C: E1a: staff calls registerPatient (SO18). E2a: staff calls startBooking again with one patient number
+    end
+    C-->>Staff: matches
