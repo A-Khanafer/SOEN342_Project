@@ -1,0 +1,7 @@
+sequenceDiagram
+    actor Staff as :AdministrativeStaff
+    participant C as :BookingController
+    Note over Staff,C: SO03 cancelBooking(). UC1 E*a. Contract CO3
+    Staff->>C: cancelBooking()
+    C->>C: setCurrentPatient(null)
+    Note over C: unfinished booking discarded. No Appointment created, no TimeSlot changed, nothing to release

@@ -1,0 +1,323 @@
+classDiagram
+    direction LR
+
+    %% ---------------- UI and controllers ----------------
+    class ConsoleMenu {
+        <<UI, Part C>>
+        -staffName : String
+        +ConsoleMenu(in : Scanner, staffName : String)
+        +run() void
+        +main(args : String[])$ void
+    }
+    class BookingController {
+        <<controller, UC1>>
+        -currentPatient : Patient
+        -staffName : String
+        +startBooking(patientKey : String) List~Patient~
+        +bookTimeSlot(ts : TimeSlot) Appointment
+        +cancelBooking() void
+        +registerPatient(firstName : String, lastName : String, dateOfBirth : LocalDate, phone : String, insurance : Insurance) Patient
+        +getCurrentPatient() Patient
+        -setCurrentPatient(p : Patient) void
+    }
+    class ConsultationController {
+        <<controller, UC2, design only>>
+        -appointment : Appointment
+        -clinicalRecord : ClinicalRecord
+        -notes : ConsultationNotes
+        +startConsultation(appointmentId) ClinicalRecord
+        +enterConsultationNotes(reasonForVisit : String, findings : String, diagnosis : String) void
+        +endConsultation() Consultation
+        +abandonConsultation() void
+    }
+    class ReferralController {
+        <<controller, UC3, design only>>
+        -currentPatient : Patient
+        -currentIssuer : HealthcareProfessional
+        +beginReferral(patientNumber : int) void
+        +issueReferral(medSpecialty : MedSpecialty, clinicalReason : String, receivingProfessional : HealthcareProfessional) Referral
+        +cancelReferral() void
+        -retainContext(p : Patient, issuer : HealthcareProfessional) void
+        -clearReferralContext() void
+    }
+
+    %% ---------------- pure fabrications ----------------
+    class PatientRegistry {
+        <<Part C>>
+        +PatientRegistry(shared : List~Patient~)
+        +findByKey(patientKey : String) List~Patient~
+        +findByPhone(phone : String) List~Patient~
+        +register(firstName : String, lastName : String, dateOfBirth : LocalDate, phone : String) Patient
+        +findDuplicate(firstName : String, lastName : String, dateOfBirth : LocalDate) Patient
+        +getAll() List~Patient~
+    }
+    class AppointmentRegistry {
+        <<Part C, find from UC2>>
+        +AppointmentRegistry(shared : List~Appointment~)
+        +book(patient : Patient, slot : TimeSlot) Appointment
+        +findOverlapping(patient : Patient, slot : TimeSlot) Appointment
+        +findByPatient(patient : Patient) List~Appointment~
+        +find(appointmentId) Appointment
+        +getAll() List~Appointment~
+        -timesOverlap(a : TimeSlot, b : TimeSlot)$ boolean
+    }
+    class ActivityLog {
+        <<Part C, UC1 and UC2>>
+        +record(performedBy : String, action : String, patient : Patient) ActivityRecord
+        +getAll() List~ActivityRecord~
+    }
+    class AvailabilityService {
+        <<Part B>>
+        +createAvailability(professional : HealthcareProfessional, location : ClinicLocation, startDate : LocalDate, endDate : LocalDate, pattern : RecurrencePattern, startTime : LocalTime, endTime : LocalTime, slotMinutes : int) List~TimeSlot~
+        +searchAvailability(criteria : SearchCriteria) List~TimeSlot~
+        +addSlot(slot : TimeSlot) void
+        +getAllSlots() List~TimeSlot~
+    }
+    class SearchCriteria {
+        <<Part B>>
+        -fromDate : LocalDate
+        -toDate : LocalDate
+        +SearchCriteria(professional : HealthcareProfessional, specialty : MedSpecialty, fromDate : LocalDate, toDate : LocalDate)
+        +any()$ SearchCriteria
+    }
+    class ProfessionalRegistry {
+        <<Part B>>
+        +findOrCreate(title : String, firstName : String, lastName : String, professionType : String) HealthcareProfessional
+        +find(firstName : String, lastName : String) HealthcareProfessional
+        +getAll() List~HealthcareProfessional~
+    }
+    class RecurrencePattern {
+        <<interface, Part B>>
+        +includes(date : LocalDate) boolean
+    }
+    class DailyPattern
+    class WeeklyPattern {
+        -days : Set~DayOfWeek~
+    }
+    class MonthlyPattern {
+        -dayOfMonth : int
+    }
+    class CsvImportExport {
+        <<Part A>>
+        +CsvImportExport(professionals : ProfessionalRegistry, availability : AvailabilityService, defaultLocation : ClinicLocation, patients : List~Patient~, appointments : List~Appointment~)
+        +importAvailability(source : Path) ImportResult
+        +importAppointments(source : Path) ImportResult
+        +importWaitlistPatients(source : Path) ImportResult
+        +exportAvailability(destination : Path) int
+        +getWaitlistPatientInfo() List~WaitlistPatientInfo~
+    }
+    class ImportResult {
+        <<Part A>>
+        +getRowsImported() int
+        +getErrors() List~String~
+    }
+    class WaitlistPatientInfo {
+        <<Part A>>
+        -referralType : String
+        -description : String
+    }
+    class UserAccount {
+        <<UC2, design only>>
+        +getProfessional() HealthcareProfessional
+        +hasClinicalAccess() boolean
+    }
+    class UserSession {
+        <<UC3, design only>>
+        +getActor() String
+        +canIssueReferral() boolean
+        +getProfessional() HealthcareProfessional
+    }
+    class ClinicRecords {
+        <<UC3, design only>>
+        +findPatient(patientNumber : int) Patient
+        +isSpecialtyOffered(s : MedSpecialty) boolean
+        +recordActivity(actor, patient : Patient, action : String) void
+        +makeActivity(actor, patient : Patient, action : String) ActivityRecord
+        +recordReferralAndActivity(p : Patient, r : Referral, ar : ActivityRecord) boolean
+        +addActivity(ar : ActivityRecord) void
+        +addReferral(r : Referral) void
+    }
+    class ConsultationNotes {
+        <<UC2, design only>>
+        -reasonForVisit : String
+        -findings : String
+        -diagnosis : String
+    }
+
+    %% ---------------- domain classes ----------------
+    class Patient {
+        -patientNumber : int
+        -firstName : String
+        -lastName : String
+        -phone : String
+        -dateOfBirth : LocalDate
+        +Patient(firstName : String, lastName : String, phone : String, dateOfBirth : LocalDate)
+        +addInsurance(insurance : Insurance) void
+        +getRamqNumber() String
+        +getInsurances() List~Insurance~
+        +getPatientNumber() int
+        +getFirstName() String
+        +getLastName() String
+        +getFullName() String
+        +getPhone() String
+        +getDateOfBirth() LocalDate
+        +getClinicalRecord() ClinicalRecord
+        +findOpenReferral(s : MedSpecialty) Referral
+        +makeReferral(issuer, s, clinicalReason, receiver, date) Referral
+        +addReferral(r : Referral) void
+    }
+    class Insurance {
+        -type : InsuranceType
+        -number : String
+        -provider : String
+        +Insurance(type : InsuranceType, number : String, provider : String)
+    }
+    class InsuranceType {
+        <<enumeration>>
+        RAMQ
+        PRIVATE
+    }
+    class HealthcareProfessional {
+        -id : int
+        -title : String
+        -firstName : String
+        -lastName : String
+        -licenseNumber : String
+        -professionType : String
+        +addSpecialty(s : MedSpecialty) void
+        +hasSpecialty(s : MedSpecialty) boolean
+        +getSpecialties() List~MedSpecialty~
+        +getFullName() String
+    }
+    class MedSpecialty {
+        -name : String
+    }
+    class ClinicLocation {
+        -name : String
+        -address : String
+        -phone : String
+    }
+    class TimeSlot {
+        -date : LocalDate
+        -startTime : LocalTime
+        -endTime : LocalTime
+        -status : SlotStatus
+        +isOpen() boolean
+        +overlaps(other : TimeSlot) boolean
+        ~book() void
+        ~release() void
+        +getDate() LocalDate
+        +getStartTime() LocalTime
+        +getEndTime() LocalTime
+        +getProfessional() HealthcareProfessional
+        +getLocation() ClinicLocation
+    }
+    class SlotStatus {
+        <<enumeration>>
+        OPEN
+        BOOKED
+    }
+    class Appointment {
+        -status : AppointmentStatus
+        -arrivalTime : LocalDateTime
+        +Appointment(patient : Patient, slot : TimeSlot)
+        +registerArrival() void
+        +cancel() void
+        +getPatient() Patient
+        +getSlot() TimeSlot
+        +getStatus() AppointmentStatus
+        +canStart(today : LocalDate) boolean
+        +isAssignedTo(h : HealthcareProfessional) boolean
+        +complete(c : Consultation) void
+    }
+    class AppointmentStatus {
+        <<enumeration>>
+        BOOKED
+        ARRIVED
+        COMPLETED
+        CANCELLED
+    }
+    class ActivityRecord {
+        <<Part C>>
+        -timestamp : LocalDateTime
+        -action : String
+        -performedBy : String
+        +ActivityRecord(timestamp : LocalDateTime, action : String, performedBy : String, patient : Patient)
+    }
+    class ClinicalRecord {
+        <<UC2, design only>>
+        +recordConsultation(a : Appointment, notes : ConsultationNotes) Consultation
+        +add(c : Consultation) void
+    }
+    class Consultation {
+        <<UC2, design only>>
+        -observations : String
+        -diagnosis : String
+    }
+    class Referral {
+        <<UC3, design only>>
+        -issueDate : LocalDate
+        -clinicalReason : String
+        -priority
+        -status
+    }
+
+    %% ---------------- associations (navigability = arrow direction) ----------------
+    ConsoleMenu "1" --> "1" BookingController
+    ConsoleMenu "1" --> "1" AvailabilityService
+    ConsoleMenu "1" --> "1" ProfessionalRegistry
+    ConsoleMenu "1" --> "1" CsvImportExport
+    ConsoleMenu "1" --> "1" PatientRegistry
+    ConsoleMenu "1" --> "1" AppointmentRegistry
+    ConsoleMenu "1" --> "1" ActivityLog
+    BookingController "0..*" --> "1" PatientRegistry : patients
+    BookingController "0..*" --> "1" AppointmentRegistry : appointments
+    BookingController "0..*" --> "1" ActivityLog : log
+    BookingController "0..*" --> "0..1" Patient : currentPatient
+    ConsultationController "0..*" --> "1" AppointmentRegistry
+    ConsultationController "0..*" --> "1" ActivityLog
+    ConsultationController "0..*" --> "1" UserAccount : user
+    ConsultationController "0..1" --> "0..1" ConsultationNotes : notes
+    ReferralController "0..*" --> "1" UserSession : session
+    ReferralController "0..*" --> "1" ClinicRecords : records
+    ReferralController "0..*" --> "0..1" Patient : currentPatient
+    ClinicRecords "1" --> "1" ProfessionalRegistry
+    ClinicRecords "1" o--> "0..*" Referral
+    ClinicRecords "1" o--> "0..*" ActivityRecord
+    PatientRegistry "1" o--> "0..*" Patient
+    AppointmentRegistry "1" o--> "0..*" Appointment
+    ActivityLog "1" o--> "0..*" ActivityRecord
+    AvailabilityService "1" o--> "0..*" TimeSlot
+    ProfessionalRegistry "1" o--> "0..*" HealthcareProfessional
+    CsvImportExport "0..*" --> "1" AvailabilityService
+    CsvImportExport "0..*" --> "1" ProfessionalRegistry
+    CsvImportExport "1" o--> "0..*" WaitlistPatientInfo
+    CsvImportExport ..> ImportResult : creates
+    WaitlistPatientInfo "0..*" --> "1" Patient
+    SearchCriteria "0..*" --> "0..1" HealthcareProfessional
+    SearchCriteria "0..*" --> "0..1" MedSpecialty
+    AvailabilityService ..> SearchCriteria
+    AvailabilityService ..> RecurrencePattern
+    RecurrencePattern <|.. DailyPattern
+    RecurrencePattern <|.. WeeklyPattern
+    RecurrencePattern <|.. MonthlyPattern
+    UserAccount "0..*" --> "0..1" HealthcareProfessional
+    UserSession "0..*" --> "0..1" HealthcareProfessional
+    Patient "1" --> "0..*" Insurance : has
+    Insurance "0..*" --> "1" InsuranceType
+    Patient "1" *--> "1" ClinicalRecord : has
+    Patient "1" --> "0..*" Referral : concerns
+    ClinicalRecord "1" *--> "0..*" Consultation : contains
+    ClinicalRecord ..> ConsultationNotes
+    Appointment "0..*" --> "1" Patient : books
+    Appointment "0..*" --> "1" TimeSlot : assigned to
+    Appointment "1" --> "0..1" Consultation : results in
+    Appointment "0..*" --> "1" AppointmentStatus
+    TimeSlot "0..*" --> "1" HealthcareProfessional : is for
+    TimeSlot "0..*" --> "1" ClinicLocation : applies at
+    TimeSlot "0..*" --> "1" SlotStatus
+    HealthcareProfessional "0..*" --> "0..*" MedSpecialty : has
+    ActivityRecord "0..*" --> "0..1" Patient : concerns
+    Referral "0..*" --> "1" HealthcareProfessional : issued by
+    Referral "0..*" --> "0..1" HealthcareProfessional : receiver
+    Referral "0..*" --> "1" MedSpecialty : requests specialty
